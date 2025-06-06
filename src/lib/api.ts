@@ -28,11 +28,11 @@ export async function getInterviewFeedback(question: string, answer: string) {
   return res.json();
 }
 
-export async function generateInterviewQuestions(position: string, experience: string) {
+export async function generateInterviewQuestions(company: string, position: string, experience: string) {
   const res = await fetch('http://localhost:3001/api/interview/questions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ position, experience }),
+    body: JSON.stringify({ company, position, experience }),
   });
   if (!res.ok) throw new Error('Failed to generate interview questions');
   return res.json();

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useCompanies, Company } from "@/contexts/CompaniesContext";
 import { 
   Building2, 
   Plus, 
@@ -15,29 +16,10 @@ import {
   X
 } from "lucide-react";
 
-interface Company {
-  id: string;
-  name: string;
-  position: string;
-  keywords: string[];
-}
 
 const CompanyManager = () => {
   const { toast } = useToast();
-  const [companies, setCompanies] = useState<Company[]>([
-    {
-      id: "1",
-      name: "네이버",
-      position: "프론트엔드 개발자",
-      keywords: ["React", "TypeScript", "사용자 경험", "팀워크", "성장"]
-    },
-    {
-      id: "2", 
-      name: "카카오",
-      position: "풀스택 개발자",
-      keywords: ["Vue.js", "Node.js", "혁신", "도전정신", "커뮤니케이션"]
-    }
-  ]);
+  const { companies, setCompanies } = useCompanies();
 
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);

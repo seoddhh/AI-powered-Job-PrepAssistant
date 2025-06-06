@@ -6,6 +6,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { generateInterviewQuestions, getInterviewFeedback } from "@/lib/api";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useCompanies } from "@/contexts/CompaniesContext";
 import { 
   MessageSquare, 
   Wand2, 
@@ -26,7 +34,9 @@ interface Question {
 
 const InterviewManager = () => {
   const { toast } = useToast();
+  const { companies } = useCompanies();
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
+  const [company, setCompany] = useState('');
   const [position, setPosition] = useState('');
   const [experience, setExperience] = useState('');
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -34,12 +44,12 @@ const InterviewManager = () => {
   const selectedQuestion = questions.find(q => q.id === selectedQuestionId);
 
   const handleGenerateQuestions = async () => {
-    if (!position.trim() || !experience.trim()) {
-      toast({ title: '입력 오류', description: '직무와 경력을 입력해주세요.', variant: 'destructive' });
+    if (!company.trim() || !position.trim() || !experience.trim()) {
+      toast({ title: '입력 오류', description: '기업, 직무, 경력을 입력해주세요.', variant: 'destructive' });
       return;
     }
     try {
-      const result = await generateInterviewQuestions(position, experience);
+      const result = await generateInterviewQuestions(company, position, experience);
       const lines = (result.result || result).split('\n').filter((l: string) => l.trim());
       const items = lines.map((line: string, idx: number) => ({
         id: String(idx + 1),
@@ -175,6 +185,16 @@ const InterviewManager = () => {
               질문을 선택하여 답변해보세요
             </CardDescription>
             <div className="space-y-2 pt-4">
+              <Select value={company} onValueChange={setCompany}>
+                <SelectTrigger>
+                  <SelectValue placeholder="기업 선택" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <input
                 className="w-full border rounded p-2 text-sm"
                 placeholder="지원 직무"

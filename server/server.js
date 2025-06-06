@@ -82,13 +82,13 @@ app.post('/api/resume/generate', async (req, res) => {
 
 app.post('/api/interview/questions', async (req, res) => {
   try {
-    const { position, experience } = req.body;
+    const { company, position, experience } = req.body;
 
-    if (!position || !experience) {
+    if (!company || !position || !experience) {
       return res.status(400).json({ error: '모든 필드를 입력해주세요.' });
     }
 
-    const prompt = `${position} 포지션에 대한 면접 질문을 생성해주세요.
+    const prompt = `${company} 기업 ${position} 포지션 면접 질문을 생성해주세요.
 경력: ${experience}
 
 다음 카테고리별로 3개씩 질문을 생성해주세요:

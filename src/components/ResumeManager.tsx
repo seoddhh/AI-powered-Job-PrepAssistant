@@ -9,15 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { analyzeResume, generateResume } from "@/lib/api";
-import { 
-  FileText, 
-  Wand2, 
-  Eye, 
-  Save, 
+import {
+  FileText,
+  Wand2,
+  Eye,
+  Save,
   Copy,
-  CheckCircle,
-  AlertTriangle,
-  Lightbulb
+  CheckCircle
 } from "lucide-react";
 
 const ResumeManager = () => {
@@ -25,18 +23,8 @@ const ResumeManager = () => {
   const [originalText, setOriginalText] = useState("");
   const [keywords, setKeywords] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-
-  // Mock feedback data
-  const feedbackData = {
-    grammarIssues: [
-      { line: 2, issue: "문장이 너무 길어 가독성이 떨어집니다.", suggestion: "두 개의 문장으로 나누어 작성해보세요." },
-      { line: 5, issue: "수동태 표현보다 능동태로 작성하는 것이 좋습니다.", suggestion: "주체를 명확히 하여 능동적으로 표현해보세요." }
-    ],
-    structureIssues: [
-      { section: "도입부", issue: "지원동기가 명확하지 않습니다.", suggestion: "회사와 직무에 대한 구체적인 관심사를 표현해보세요." },
-      { section: "경험 설명", issue: "성과에 대한 구체적인 수치가 부족합니다.", suggestion: "프로젝트 결과를 정량적으로 표현해보세요." }
-    ]
-  };
+  const [feedback, setFeedback] = useState("");
+  const [generated, setGenerated] = useState("");
 
   const handleAnalyze = async () => {
     if (!originalText.trim()) {
@@ -50,7 +38,8 @@ const ResumeManager = () => {
 
     setIsAnalyzing(true);
     try {
-      await analyzeResume(originalText);
+      const result = await analyzeResume(originalText);
+      setFeedback(result.result || result);
       toast({
         title: "분석 완료",
         description: "AI 첨삭이 완료되었습니다. 결과를 확인해보세요.",
@@ -78,7 +67,8 @@ const ResumeManager = () => {
 
     setIsAnalyzing(true);
     try {
-      await generateResume(keywords);
+      const result = await generateResume(keywords);
+      setGenerated(result.result || result);
       toast({
         title: "생성 완료",
         description: "AI가 자기소개서를 생성했습니다.",
@@ -186,51 +176,14 @@ const ResumeManager = () => {
                   AI 첨삭 결과
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Grammar Issues */}
-                <div>
-                  <h4 className="font-medium text-slate-800 mb-2 flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4 text-orange-500" />
-                    문법 및 표현 개선
-                  </h4>
-                  <div className="space-y-2">
-                    {feedbackData.grammarIssues.map((item, index) => (
-                      <div key={index} className="bg-orange-50 p-3 rounded-lg">
-                        <p className="text-sm font-medium text-orange-800">
-                          {index + 1}줄: {item.issue}
-                        </p>
-                        <p className="text-sm text-orange-600 mt-1">
-                          💡 {item.suggestion}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Structure Issues */}
-                <div>
-                  <h4 className="font-medium text-slate-800 mb-2 flex items-center gap-2">
-                    <Lightbulb className="h-4 w-4 text-blue-500" />
-                    구성 및 내용 개선
-                  </h4>
-                  <div className="space-y-2">
-                    {feedbackData.structureIssues.map((item, index) => (
-                      <div key={index} className="bg-blue-50 p-3 rounded-lg">
-                        <p className="text-sm font-medium text-blue-800">
-                          {item.section}: {item.issue}
-                        </p>
-                        <p className="text-sm text-blue-600 mt-1">
-                          💡 {item.suggestion}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <Button className="w-full">
-                  <Copy className="h-4 w-4 mr-2" />
-                  개선된 버전 복사
-                </Button>
+              <CardContent>
+                <Textarea
+                  readOnly
+                  value={feedback}
+                  placeholder="AI 분석 결과가 여기에 표시됩니다."
+                  className="w-full"
+                  rows={15}
+                />
               </CardContent>
             </Card>
           </div>
@@ -289,8 +242,8 @@ const ResumeManager = () => {
                     AI가 생성한 자기소개서입니다. 필요에 따라 수정하여 사용하세요.
                   </p>
                   <div className="bg-white p-4 rounded-lg border">
-                    <p className="text-sm leading-relaxed">
-                      생성된 자기소개서가 여기에 표시됩니다...
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {generated || "생성된 자기소개서가 여기에 표시됩니다..."}
                     </p>
                   </div>
                   <div className="flex gap-2 mt-4">

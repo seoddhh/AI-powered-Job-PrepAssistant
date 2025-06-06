@@ -3,9 +3,9 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { generateInterviewQuestions, getInterviewFeedback } from "@/lib/api";
 import { 
   MessageSquare, 
   Wand2, 
@@ -13,7 +13,6 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  Lightbulb,
   Target
 } from "lucide-react";
 
@@ -22,55 +21,40 @@ interface Question {
   question: string;
   answer: string;
   status: 'unanswered' | 'pending' | 'completed';
-  feedback?: {
-    score: number;
-    improvements: string[];
-    suggestions: string[];
-  };
+  feedback?: string;
 }
 
 const InterviewManager = () => {
   const { toast } = useToast();
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
-  const [questions, setQuestions] = useState<Question[]>([
-    {
-      id: "1",
-      question: "자기소개를 해주세요.",
-      answer: "",
-      status: 'unanswered'
-    },
-    {
-      id: "2", 
-      question: "왜 우리 회사에 지원하셨나요?",
-      answer: "네이버는 혁신적인 기술로 사용자들의 일상을 변화시키는 회사입니다. 특히 프론트엔드 개발자로서 수많은 사용자가 사용하는 서비스를 만들고 싶습니다.",
-      status: 'completed',
-      feedback: {
-        score: 75,
-        improvements: ["구체적인 경험 사례 추가 필요", "회사의 구체적인 가치나 프로젝트 언급"],
-        suggestions: ["본인의 기술 스택과 회사의 기술 스택 연결점 설명", "실제 네이버 서비스 사용 경험 언급"]
-      }
-    },
-    {
-      id: "3",
-      question: "프론트엔드 개발에서 가장 중요하게 생각하는 것은 무엇인가요?",
-      answer: "사용자 경험이라고 생각합니다. 아무리 좋은 기능이라도 사용자가 쉽게 사용할 수 없다면 의미가 없다고 봅니다.",
-      status: 'pending'
-    },
-    {
-      id: "4",
-      question: "팀 프로젝트에서 갈등이 생겼을 때 어떻게 해결하시나요?",
-      answer: "",
-      status: 'unanswered'
-    },
-    {
-      id: "5",
-      question: "본인의 강점과 약점을 말씀해주세요.",
-      answer: "",
-      status: 'unanswered'
-    }
-  ]);
+  const [position, setPosition] = useState('');
+  const [experience, setExperience] = useState('');
+  const [questions, setQuestions] = useState<Question[]>([]);
 
   const selectedQuestion = questions.find(q => q.id === selectedQuestionId);
+
+  const handleGenerateQuestions = async () => {
+    if (!position.trim() || !experience.trim()) {
+      toast({ title: '입력 오류', description: '직무와 경력을 입력해주세요.', variant: 'destructive' });
+      return;
+    }
+    try {
+      const result = await generateInterviewQuestions(position, experience);
+      const lines = (result.result || result).split('\n').filter((l: string) => l.trim());
+      const items = lines.map((line: string, idx: number) => ({
+        id: String(idx + 1),
+        question: line.replace(/^질문:\s*/, '').trim(),
+        answer: '',
+        status: 'unanswered' as const,
+      }));
+      setQuestions(items);
+      setSelectedQuestionId(null);
+      toast({ title: '생성 완료', description: '면접 질문이 생성되었습니다.' });
+    } catch (err) {
+      console.error(err);
+      toast({ title: '오류', description: '질문 생성에 실패했습니다.', variant: 'destructive' });
+    }
+  };
 
   const handleAnswerChange = (value: string) => {
     if (!selectedQuestionId) return;
@@ -110,40 +94,29 @@ const InterviewManager = () => {
   const handleRequestFeedback = async () => {
     if (!selectedQuestion?.answer.trim()) return;
 
-    // Simulate AI feedback request
-    setQuestions(prev => prev.map(q => 
-      q.id === selectedQuestionId 
+    setQuestions(prev => prev.map(q =>
+      q.id === selectedQuestionId
         ? { ...q, status: 'pending' as const }
         : q
     ));
 
-    // Simulate AI response after 3 seconds
-    setTimeout(() => {
-      setQuestions(prev => prev.map(q => 
-        q.id === selectedQuestionId 
-          ? { 
-              ...q, 
-              status: 'completed' as const,
-              feedback: {
-                score: Math.floor(Math.random() * 30) + 70,
-                improvements: [
-                  "구체적인 사례를 더 추가해주세요",
-                  "결과와 성과를 정량적으로 표현해보세요"
-                ],
-                suggestions: [
-                  "STAR 기법을 활용해보세요",
-                  "본인의 역할과 기여도를 명확히 해주세요"
-                ]
-              }
-            }
+    try {
+      const result = await getInterviewFeedback(selectedQuestion.question, selectedQuestion.answer);
+      setQuestions(prev => prev.map(q =>
+        q.id === selectedQuestionId
+          ? { ...q, status: 'completed' as const, feedback: result.result || result }
           : q
       ));
-      
-      toast({
-        title: "피드백 완료",
-        description: "AI 피드백이 생성되었습니다.",
-      });
-    }, 3000);
+      toast({ title: '피드백 완료', description: 'AI 피드백이 생성되었습니다.' });
+    } catch (err) {
+      console.error(err);
+      toast({ title: '오류', description: '피드백 생성에 실패했습니다.', variant: 'destructive' });
+      setQuestions(prev => prev.map(q =>
+        q.id === selectedQuestionId
+          ? { ...q, status: 'unanswered' as const }
+          : q
+      ));
+    }
   };
 
   const getStatusIcon = (status: Question['status']) => {
@@ -201,16 +174,36 @@ const InterviewManager = () => {
             <CardDescription>
               질문을 선택하여 답변해보세요
             </CardDescription>
+            <div className="space-y-2 pt-4">
+              <input
+                className="w-full border rounded p-2 text-sm"
+                placeholder="지원 직무"
+                value={position}
+                onChange={(e) => setPosition(e.target.value)}
+              />
+              <input
+                className="w-full border rounded p-2 text-sm"
+                placeholder="경력"
+                value={experience}
+                onChange={(e) => setExperience(e.target.value)}
+              />
+              <Button className="w-full" onClick={handleGenerateQuestions}>
+                질문 생성
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[600px]">
               <div className="space-y-3">
+                {questions.length === 0 && (
+                  <p className="text-sm text-slate-500">질문을 생성해주세요.</p>
+                )}
                 {questions.map((question, index) => (
                   <div
                     key={question.id}
                     onClick={() => setSelectedQuestionId(question.id)}
                     className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                      selectedQuestionId === question.id 
+                      selectedQuestionId === question.id
                         ? 'border-blue-500 bg-blue-50' 
                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                     }`}
@@ -297,51 +290,8 @@ const InterviewManager = () => {
                       <Target className="h-5 w-5 text-blue-600" />
                       AI 피드백 결과
                     </h4>
-                    
-                    {/* Score */}
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm font-medium text-blue-800">종합 점수</span>
-                        <Badge variant="secondary">{selectedQuestion.feedback.score}/100</Badge>
-                      </div>
-                      <div className="w-full bg-blue-200 rounded-full h-2">
-                        <div 
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${selectedQuestion.feedback.score}%` }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    {/* Improvements */}
-                    <div className="bg-orange-50 p-4 rounded-lg">
-                      <h5 className="font-medium text-orange-800 mb-2 flex items-center gap-2">
-                        <AlertCircle className="h-4 w-4" />
-                        개선이 필요한 부분
-                      </h5>
-                      <ul className="space-y-1">
-                        {selectedQuestion.feedback.improvements.map((item, index) => (
-                          <li key={index} className="text-sm text-orange-700 flex items-start gap-2">
-                            <span className="text-orange-500 mt-1">•</span>
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Suggestions */}
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <h5 className="font-medium text-green-800 mb-2 flex items-center gap-2">
-                        <Lightbulb className="h-4 w-4" />
-                        개선 제안사항
-                      </h5>
-                      <ul className="space-y-1">
-                        {selectedQuestion.feedback.suggestions.map((item, index) => (
-                          <li key={index} className="text-sm text-green-700 flex items-start gap-2">
-                            <span className="text-green-500 mt-1">•</span>
-                            {item}
-                          </li>
-                        ))}
-                      </ul>
+                    <div className="bg-slate-50 p-4 rounded-lg whitespace-pre-wrap text-sm">
+                      {selectedQuestion.feedback}
                     </div>
                   </div>
                 )}

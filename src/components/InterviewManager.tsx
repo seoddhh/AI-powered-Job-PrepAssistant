@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { getInterviewFeedback } from "@/lib/api";
 import { 
   MessageSquare, 
   Wand2, 
@@ -110,40 +111,37 @@ const InterviewManager = () => {
   const handleRequestFeedback = async () => {
     if (!selectedQuestion?.answer.trim()) return;
 
-    // Simulate AI feedback request
-    setQuestions(prev => prev.map(q => 
-      q.id === selectedQuestionId 
+    setQuestions(prev => prev.map(q =>
+      q.id === selectedQuestionId
         ? { ...q, status: 'pending' as const }
         : q
     ));
 
-    // Simulate AI response after 3 seconds
-    setTimeout(() => {
-      setQuestions(prev => prev.map(q => 
-        q.id === selectedQuestionId 
-          ? { 
-              ...q, 
-              status: 'completed' as const,
-              feedback: {
-                score: Math.floor(Math.random() * 30) + 70,
-                improvements: [
-                  "구체적인 사례를 더 추가해주세요",
-                  "결과와 성과를 정량적으로 표현해보세요"
-                ],
-                suggestions: [
-                  "STAR 기법을 활용해보세요",
-                  "본인의 역할과 기여도를 명확히 해주세요"
-                ]
-              }
-            }
+    try {
+      const { feedback } = await getInterviewFeedback(
+        selectedQuestion.question,
+        selectedQuestion.answer
+      );
+      setQuestions(prev => prev.map(q =>
+        q.id === selectedQuestionId
+          ? { ...q, status: 'completed' as const, feedback }
           : q
       ));
-      
       toast({
         title: "피드백 완료",
         description: "AI 피드백이 생성되었습니다.",
       });
-    }, 3000);
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "오류",
+        description: "피드백 생성 중 문제가 발생했습니다.",
+        variant: "destructive",
+      });
+      setQuestions(prev => prev.map(q =>
+        q.id === selectedQuestionId ? { ...q, status: 'unanswered' as const } : q
+      ));
+    }
   };
 
   const getStatusIcon = (status: Question['status']) => {

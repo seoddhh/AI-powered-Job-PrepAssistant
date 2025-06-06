@@ -25,5 +25,11 @@ export async function getInterviewFeedback(question: string, answer: string) {
     body: JSON.stringify({ question, answer }),
   });
   if (!res.ok) throw new Error('Failed to get interview feedback');
-  return res.json();
+  return res.json() as Promise<{
+    feedback: {
+      score: number;
+      improvements: string[];
+      suggestions: string[];
+    };
+  }>;
 }

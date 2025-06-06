@@ -4,15 +4,17 @@
 
 ```mermaid
 graph LR
-  A[사용자 브라우저]
-  B[프런트엔드 (React/Vite)]
-  C[백엔드 서버 (Express)]
-  D[Anthropic API\nClaude 3]
-  A --> B
-  B -- HTTP 요청 --> C
-  C -- Anthropic SDK --> D
-  D -- 응답 --> C
-  C -- JSON 응답 --> B
+A[사용자 브라우저]
+B[프론트엔드: React-Vite]
+C[백엔드 서버: Express]
+D[Anthropic API: Claude 3]
+
+A --> B
+B -->|HTTP 요청| C
+C -->|Anthropic SDK| D
+D -->|응답| C
+C -->|JSON 응답| B
+
 ```
 
 ## 컴포넌트 역할

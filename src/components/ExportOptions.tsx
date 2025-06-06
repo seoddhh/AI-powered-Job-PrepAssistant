@@ -1,5 +1,8 @@
 
 import { useState } from "react";
+import { jsPDF } from "jspdf";
+import { Document, Packer, Paragraph, TextRun } from "docx";
+import { saveAs } from "file-saver";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -48,6 +51,18 @@ const ExportOptions = () => {
     }
   };
 
+  const gatherSelectedData = () => {
+    const data: Record<string, string> = {
+      personal: "인적사항 내용",
+      resume: "자기소개서 내용",
+      companies: "기업 정보 내용",
+      questions: "면접 질문 내용",
+      answers: "면접 답변 내용",
+      summary: "전체 요약 내용",
+    };
+    return selectedItems.map(id => data[id]).filter(Boolean).join("\n\n");
+  };
+
   const handleExport = async () => {
     if (selectedItems.length === 0) {
       toast({
@@ -68,15 +83,37 @@ const ExportOptions = () => {
     }
 
     setIsExporting(true);
-    
-    // Simulate export process
-    setTimeout(() => {
-      setIsExporting(false);
+
+    const content = gatherSelectedData();
+
+    try {
+      if (fileFormat === "pdf") {
+        const doc = new jsPDF();
+        const font = fontStyle === "serif" ? "Times" : fontStyle === "sans" ? "Helvetica" : "Helvetica";
+        doc.setFont(font);
+        const lines = doc.splitTextToSize(content, 180);
+        doc.text(lines, 10, 10);
+        doc.save("export.pdf");
+      } else {
+        const paragraphs = content.split("\n\n").map(p => new Paragraph(p));
+        const doc = new Document({ sections: [{ children: paragraphs }] });
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, "export.docx");
+      }
+
       toast({
         title: "출력 완료",
         description: `${fileFormat.toUpperCase()} 파일이 다운로드되었습니다.`,
       });
-    }, 3000);
+    } catch (e) {
+      toast({
+        title: "오류",
+        description: "파일 생성 중 문제가 발생했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (

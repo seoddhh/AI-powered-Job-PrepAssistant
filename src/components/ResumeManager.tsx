@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { analyzeResume, generateResume } from "@/lib/api";
 import { 
   FileText, 
   Wand2, 
@@ -48,14 +49,21 @@ const ResumeManager = () => {
     }
 
     setIsAnalyzing(true);
-    // Simulate AI analysis
-    setTimeout(() => {
-      setIsAnalyzing(false);
+    try {
+      await analyzeResume(originalText);
       toast({
         title: "분석 완료",
         description: "AI 첨삭이 완료되었습니다. 결과를 확인해보세요.",
       });
-    }, 3000);
+    } catch (err) {
+      toast({
+        title: "오류",
+        description: "분석 요청 중 문제가 발생했습니다.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleGenerate = async () => {
@@ -69,14 +77,21 @@ const ResumeManager = () => {
     }
 
     setIsAnalyzing(true);
-    // Simulate AI generation
-    setTimeout(() => {
-      setIsAnalyzing(false);
+    try {
+      await generateResume(keywords);
       toast({
         title: "생성 완료",
         description: "AI가 자기소개서를 생성했습니다.",
       });
-    }, 5000);
+    } catch (err) {
+      toast({
+        title: "오류",
+        description: "생성 요청 중 문제가 발생했습니다.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   return (

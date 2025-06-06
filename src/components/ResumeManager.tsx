@@ -26,6 +26,28 @@ const ResumeManager = () => {
   const [feedback, setFeedback] = useState("");
   const [generated, setGenerated] = useState("");
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type === "text/plain" || file.name.endsWith(".txt")) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target?.result;
+        if (typeof text === "string") {
+          setOriginalText(text);
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      toast({
+        title: "파일 오류",
+        description: "지원하지 않는 파일 형식입니다. txt 파일을 업로드해주세요.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleAnalyze = async () => {
     if (!originalText.trim()) {
       toast({
@@ -122,6 +144,15 @@ const ResumeManager = () => {
                 rows={15}
                 className="w-full"
               />
+              <div className="space-y-2">
+                <Label htmlFor="resume-file">파일 업로드 (.txt)</Label>
+                <Input
+                  id="resume-file"
+                  type="file"
+                  accept=".txt"
+                  onChange={handleFileChange}
+                />
+              </div>
               <div className="flex justify-between items-center">
                 <p className="text-sm text-slate-500">
                   {originalText.length}/5000자 

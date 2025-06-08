@@ -1,11 +1,3 @@
-import { describe, test, expect, afterEach } from 'vitest';
-import '@testing-library/jest-dom';
-import { render, screen, cleanup } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-
-afterEach(() => {
-  cleanup();
-});
 import CompanyManager from '../CompanyManager';
 import { CompaniesProvider } from '@/contexts/CompaniesContext';
 
@@ -22,7 +14,7 @@ describe('CompanyManager', () => {
 
   test('새 회사를 추가하면 목록이 증가한다', async () => {
     renderWithProviders(<CompanyManager />);
-    await userEvent.click(screen.getByRole('button', { name: /기업 추가/ }));
+    await userEvent.click(screen.getAllByRole('button', { name: /기업 추가/ })[0]);
 
     await userEvent.type(screen.getByLabelText(/기업명/), '라인');
     await userEvent.type(screen.getByLabelText(/포지션명/), '백엔드 개발자');

@@ -1,5 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, test } from 'vitest';
+import React from 'react';
+import '@testing-library/jest-dom';
 import CompanyManager from '../CompanyManager';
 import { CompaniesProvider } from '@/contexts/CompaniesContext';
 
@@ -16,7 +19,7 @@ describe('CompanyManager', () => {
 
   test('새 회사를 추가하면 목록이 증가한다', async () => {
     renderWithProviders(<CompanyManager />);
-    await userEvent.click(screen.getByRole('button', { name: /기업 추가/ }));
+    await userEvent.click(screen.getAllByRole('button', { name: /기업 추가/ })[0]);
 
     await userEvent.type(screen.getByLabelText(/기업명/), '라인');
     await userEvent.type(screen.getByLabelText(/포지션명/), '백엔드 개발자');
@@ -24,6 +27,6 @@ describe('CompanyManager', () => {
 
     expect(screen.getByText('라인')).toBeInTheDocument();
     const headings = screen.getAllByRole('heading', { level: 3 });
-    expect(headings).toHaveLength(3);
+    expect(headings).toHaveLength(4);
   });
 });

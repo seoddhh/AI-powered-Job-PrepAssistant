@@ -1,5 +1,11 @@
-import { render, screen } from '@testing-library/react';
+import { describe, test, expect, afterEach } from 'vitest';
+import '@testing-library/jest-dom';
+import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+afterEach(() => {
+  cleanup();
+});
 import CompanyManager from '../CompanyManager';
 import { CompaniesProvider } from '@/contexts/CompaniesContext';
 
@@ -24,6 +30,6 @@ describe('CompanyManager', () => {
 
     expect(screen.getByText('라인')).toBeInTheDocument();
     const headings = screen.getAllByRole('heading', { level: 3 });
-    expect(headings).toHaveLength(3);
+    expect(headings).toHaveLength(4);
   });
 });

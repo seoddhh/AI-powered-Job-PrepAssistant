@@ -70,3 +70,26 @@ PORT=3001 # 선택 사항, 기본값 3001
 ```
 
 `ANTHROPIC_API_KEY`는 Claude API 호출에 사용되며, `PORT`는 Express 서버가 실행될 포트를 지정합니다.
+
+## 테스트 실행 및 구조
+
+이 프로젝트는 [Vitest](https://vitest.dev)를 이용해 React 컴포넌트를 테스트합니다. 의존성 설치 후 아래 명령으로 모든 테스트를 실행할 수 있습니다.
+
+```bash
+npm test
+```
+
+`npm test`는 `vitest`를 호출하며, 테스트 환경 설정은 `vitest.config.ts`에서 확인할 수 있습니다. 기본적으로 `jsdom` 환경과 전역 API를 사용하도록 구성되어 있습니다.
+
+테스트 파일은 보통 `src` 하위의 `__tests__` 폴더에 위치하며 `.test.tsx` 또는 `.test.ts` 확장자를 가집니다.
+
+예시 구조:
+
+```
+src/
+  components/
+    __tests__/
+      CompanyManager.test.tsx
+```
+
+공통 테스트 설정은 `vitest.setup.ts`에 정의되어 있으며, `src/test-utils.tsx`에는 `renderWithProviders`와 같은 테스트 도우미가 들어 있습니다.

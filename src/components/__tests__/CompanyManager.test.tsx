@@ -1,3 +1,4 @@
+import { describe, test, expect } from "vitest"
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CompanyManager from '../CompanyManager';
@@ -24,6 +25,6 @@ describe('CompanyManager', () => {
 
     expect(screen.getByText('라인')).toBeInTheDocument();
     const headings = screen.getAllByRole('heading', { level: 3 });
-    expect(headings).toHaveLength(3);
+    expect(headings).toHaveLength(4);
   });
 });

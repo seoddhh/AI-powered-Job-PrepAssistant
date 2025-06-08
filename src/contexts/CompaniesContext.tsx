@@ -29,8 +29,13 @@ const defaultCompanies: Company[] = [
 
 const CompaniesContext = createContext<CompaniesContextValue | null>(null);
 
-export const CompaniesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [companies, setCompanies] = useState<Company[]>(defaultCompanies);
+interface CompaniesProviderProps {
+  children: React.ReactNode;
+  initialCompanies?: Company[];
+}
+
+export const CompaniesProvider: React.FC<CompaniesProviderProps> = ({ children, initialCompanies }) => {
+  const [companies, setCompanies] = useState<Company[]>(initialCompanies ?? defaultCompanies);
   return (
     <CompaniesContext.Provider value={{ companies, setCompanies }}>
       {children}

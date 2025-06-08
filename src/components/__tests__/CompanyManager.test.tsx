@@ -1,9 +1,3 @@
-import { describe, test, expect } from "vitest"
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, test } from 'vitest';
-import React from 'react';
-import '@testing-library/jest-dom';
 import CompanyManager from '../CompanyManager';
 import { CompaniesProvider } from '@/contexts/CompaniesContext';
 

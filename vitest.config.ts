@@ -9,7 +9,9 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+ codex/add-personalinfoform-test
+    setupFiles: "./vitest.setup.ts",
     globals: true,
-    setupFiles: './vitest.setup.ts'
+
   },
 });

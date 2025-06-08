@@ -24,6 +24,6 @@ describe('CompanyManager', () => {
 
     expect(screen.getByText('라인')).toBeInTheDocument();
     const headings = screen.getAllByRole('heading', { level: 3 });
-    expect(headings).toHaveLength(3);
+    expect(headings).toHaveLength(4);
   });
 });

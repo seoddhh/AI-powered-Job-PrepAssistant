@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { renderWithProviders, screen, waitFor } from '@/test-utils';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
@@ -19,12 +19,8 @@ vi.mock('@/components/ui/select', () => {
 });
 
 import InterviewManager from '../InterviewManager';
-import { CompaniesProvider } from '@/contexts/CompaniesContext';
 import * as api from '@/lib/api';
 
-function renderWithProviders(ui: React.ReactElement) {
-  return render(<CompaniesProvider>{ui}</CompaniesProvider>);
-}
 
 if (!HTMLElement.prototype.hasPointerCapture) {
   Object.defineProperty(HTMLElement.prototype, 'hasPointerCapture', { value: () => {} });

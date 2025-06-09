@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { usePersonalInfo } from "@/contexts/PersonalInfoContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -25,20 +24,6 @@ import ExportOptions from "@/components/ExportOptions";
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const { personalInfo } = usePersonalInfo();
-
-  const filledFields = [
-    personalInfo.name,
-    personalInfo.desiredPosition,
-    personalInfo.experienceYears,
-    personalInfo.detailedExperience,
-  ];
-  const filledCount = filledFields.filter((f) => f && f.trim() !== "").length;
-  const personalProgress = Math.round((filledCount / filledFields.length) * 100);
-  const dashboardStats = {
-    personalInfo: { completed: personalProgress === 100, progress: personalProgress },
-    resume: { completed: false, progress: 60 },
-    companies: { count: 3, completed: true },
-    interviews: { answered: 7, total: 10, progress: 70 },
   };
 
   return (
@@ -115,7 +100,9 @@ const Index = () => {
                     {dashboardStats.resume.progress}%
                   </div>
                   <Progress value={dashboardStats.resume.progress} className="mt-2" />
-                  <p className="text-xs text-slate-600 mt-2">AI 첨삭 진행중</p>
+                  <p className="text-xs text-slate-600 mt-2">
+                    {dashboardStats.resume.completed ? 'AI 첨삭 완료' : 'AI 첨삭 진행중'}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -144,7 +131,9 @@ const Index = () => {
                     {dashboardStats.interviews.answered}/{dashboardStats.interviews.total}
                   </div>
                   <Progress value={dashboardStats.interviews.progress} className="mt-2" />
-                  <p className="text-xs text-slate-600 mt-2">질문 답변 완료</p>
+                  <p className="text-xs text-slate-600 mt-2">
+                    {dashboardStats.interviews.progress === 100 ? '모든 질문 답변 완료' : '질문 답변 진행중'}
+                  </p>
                 </CardContent>
               </Card>
             </div>

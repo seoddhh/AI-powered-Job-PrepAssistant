@@ -6,8 +6,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { CompaniesProvider } from "@/contexts/CompaniesContext";
-import { PersonalInfoProvider } from "@/contexts/PersonalInfoContext";
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -15,8 +13,6 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <CompaniesProvider>
-        <PersonalInfoProvider>
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
@@ -24,8 +20,6 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-        </PersonalInfoProvider>
-      </CompaniesProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

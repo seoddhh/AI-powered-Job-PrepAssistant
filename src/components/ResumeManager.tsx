@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useDashboard } from "@/contexts/DashboardContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
 
 const ResumeManager = () => {
   const { toast } = useToast();
+  const { setResume } = useDashboard();
   const [originalText, setOriginalText] = useState("");
   const [keywords, setKeywords] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -62,6 +64,7 @@ const ResumeManager = () => {
     try {
       const result = await analyzeResume(originalText);
       setFeedback(result.result || result);
+      setResume({ completed: true, progress: 100 });
       toast({
         title: "분석 완료",
         description: "AI 첨삭이 완료되었습니다. 결과를 확인해보세요.",

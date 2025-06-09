@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import PersonalInfoForm from '../PersonalInfoForm'
 import { Toaster } from '@/components/ui/toaster'
-import { renderWithProviders } from '@/test-utils'
+import '@testing-library/jest-dom';
 
 function setup() {
   renderWithProviders(

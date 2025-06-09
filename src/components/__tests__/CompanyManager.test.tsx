@@ -1,18 +1,22 @@
 import CompanyManager from '../CompanyManager';
 import { CompaniesProvider } from '@/contexts/CompaniesContext';
+import { render, screen } from '@testing-library/react';
+import { expect, describe, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
 
 function renderWithProviders(ui: React.ReactElement) {
   return render(<CompaniesProvider>{ui}</CompaniesProvider>);
 }
 
 describe('CompanyManager', () => {
-  test('기본 회사 목록이 표시되어야 한다', () => {
+  it('기본 회사 목록이 표시되어야 한다', () => {
     renderWithProviders(<CompanyManager />);
     expect(screen.getByText('네이버')).toBeInTheDocument();
     expect(screen.getByText('카카오')).toBeInTheDocument();
   });
 
-  test('새 회사를 추가하면 목록이 증가한다', async () => {
+  it('새 회사를 추가하면 목록이 증가한다', async () => {
     renderWithProviders(<CompanyManager />);
     await userEvent.click(screen.getAllByRole('button', { name: /기업 추가/ })[0]);
 

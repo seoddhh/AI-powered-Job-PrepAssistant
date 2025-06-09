@@ -1,5 +1,6 @@
 import { describe, test, expect } from "vitest"
 import { screen } from '@testing-library/react'
+import { renderWithProviders } from '@/test-utils'
 import userEvent from '@testing-library/user-event'
 import PersonalInfoForm from '../PersonalInfoForm'
 import { Toaster } from '@/components/ui/toaster'

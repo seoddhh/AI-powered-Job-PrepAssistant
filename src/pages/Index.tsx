@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePersonalInfo } from "@/contexts/PersonalInfoContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -23,13 +24,21 @@ import ExportOptions from "@/components/ExportOptions";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const { personalInfo } = usePersonalInfo();
 
-  // Mock data for demo purposes
+  const filledFields = [
+    personalInfo.name,
+    personalInfo.desiredPosition,
+    personalInfo.experienceYears,
+    personalInfo.detailedExperience,
+  ];
+  const filledCount = filledFields.filter((f) => f && f.trim() !== "").length;
+  const personalProgress = Math.round((filledCount / filledFields.length) * 100);
   const dashboardStats = {
-    personalInfo: { completed: true, progress: 100 },
+    personalInfo: { completed: personalProgress === 100, progress: personalProgress },
     resume: { completed: false, progress: 60 },
     companies: { count: 3, completed: true },
-    interviews: { answered: 7, total: 10, progress: 70 }
+    interviews: { answered: 7, total: 10, progress: 70 },
   };
 
   return (

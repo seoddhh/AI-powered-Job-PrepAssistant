@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { CompaniesProvider } from "@/contexts/CompaniesContext";
+import { PersonalInfoProvider } from "@/contexts/PersonalInfoContext";
 
 const queryClient = new QueryClient();
 
@@ -15,13 +16,15 @@ const App = () => (
       <Toaster />
       <Sonner />
       <CompaniesProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <PersonalInfoProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </PersonalInfoProvider>
       </CompaniesProvider>
     </TooltipProvider>
   </QueryClientProvider>

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useDashboard } from "@/contexts/DashboardContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -24,14 +23,7 @@ import ExportOptions from "@/components/ExportOptions";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-
-  const { resume, interviews } = useDashboard();
-
-  const dashboardStats = {
-    personalInfo: { completed: true, progress: 100 },
-    resume,
-    companies: { count: 3, completed: true },
-    interviews
+  const { personalInfo } = usePersonalInfo();
   };
 
   return (

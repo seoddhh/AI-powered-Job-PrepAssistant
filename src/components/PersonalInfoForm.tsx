@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,15 +8,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Save, User } from "lucide-react";
+import { usePersonalInfo } from "@/contexts/PersonalInfoContext";
 
 const PersonalInfoForm = () => {
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: "",
-    desiredPosition: "",
-    experienceYears: "",
-    detailedExperience: ""
-  });
+  const { personalInfo, setPersonalInfo } = usePersonalInfo();
+  const [formData, setFormData] = useState(personalInfo);
+
+  useEffect(() => {
+    setFormData(personalInfo);
+  }, [personalInfo]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +32,7 @@ const PersonalInfoForm = () => {
       return;
     }
 
-    // Save logic would go here
+    setPersonalInfo(formData);
     toast({
       title: "저장 완료",
       description: "인적사항이 성공적으로 저장되었습니다.",

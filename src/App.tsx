@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { CompaniesProvider } from "@/contexts/CompaniesContext";
+import { DashboardProvider } from "@/contexts/DashboardContext";
 
 const queryClient = new QueryClient();
 
@@ -14,15 +15,17 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <CompaniesProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </CompaniesProvider>
+      <DashboardProvider>
+        <CompaniesProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </CompaniesProvider>
+      </DashboardProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

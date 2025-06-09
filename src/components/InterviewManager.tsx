@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useCompanies } from "@/contexts/CompaniesContext";
+import { useDashboard } from "@/contexts/DashboardContext";
 import { 
   MessageSquare, 
   Wand2, 
@@ -35,6 +36,7 @@ interface Question {
 const InterviewManager = () => {
   const { toast } = useToast();
   const { companies } = useCompanies();
+  const { setInterviews } = useDashboard();
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
   const [company, setCompany] = useState('');
   const [position, setPosition] = useState('');
@@ -42,6 +44,13 @@ const InterviewManager = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
 
   const selectedQuestion = questions.find(q => q.id === selectedQuestionId);
+
+  useEffect(() => {
+    const total = questions.length;
+    const answered = questions.filter(q => q.status !== 'unanswered').length;
+    const progress = total === 0 ? 0 : Math.round((answered / total) * 100);
+    setInterviews({ answered, total, progress });
+  }, [questions, setInterviews]);
 
   const handleGenerateQuestions = async () => {
     if (!company.trim() || !position.trim() || !experience.trim()) {
@@ -60,6 +69,7 @@ const InterviewManager = () => {
       setQuestions(items);
       setSelectedQuestionId(null);
       toast({ title: '생성 완료', description: '면접 질문이 생성되었습니다.' });
+      setInterviews({ answered: 0, total: items.length, progress: 0 });
     } catch (err) {
       console.error(err);
       toast({ title: '오류', description: '질문 생성에 실패했습니다.', variant: 'destructive' });

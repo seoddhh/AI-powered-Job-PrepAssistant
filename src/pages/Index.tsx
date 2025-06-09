@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useDashboard } from "@/contexts/DashboardContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -24,12 +25,13 @@ import ExportOptions from "@/components/ExportOptions";
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  // Mock data for demo purposes
+  const { resume, interviews } = useDashboard();
+
   const dashboardStats = {
     personalInfo: { completed: true, progress: 100 },
-    resume: { completed: false, progress: 60 },
+    resume,
     companies: { count: 3, completed: true },
-    interviews: { answered: 7, total: 10, progress: 70 }
+    interviews
   };
 
   return (
@@ -106,7 +108,9 @@ const Index = () => {
                     {dashboardStats.resume.progress}%
                   </div>
                   <Progress value={dashboardStats.resume.progress} className="mt-2" />
-                  <p className="text-xs text-slate-600 mt-2">AI 첨삭 진행중</p>
+                  <p className="text-xs text-slate-600 mt-2">
+                    {dashboardStats.resume.completed ? 'AI 첨삭 완료' : 'AI 첨삭 진행중'}
+                  </p>
                 </CardContent>
               </Card>
 
@@ -135,7 +139,9 @@ const Index = () => {
                     {dashboardStats.interviews.answered}/{dashboardStats.interviews.total}
                   </div>
                   <Progress value={dashboardStats.interviews.progress} className="mt-2" />
-                  <p className="text-xs text-slate-600 mt-2">질문 답변 완료</p>
+                  <p className="text-xs text-slate-600 mt-2">
+                    {dashboardStats.interviews.progress === 100 ? '모든 질문 답변 완료' : '질문 답변 진행중'}
+                  </p>
                 </CardContent>
               </Card>
             </div>

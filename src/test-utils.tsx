@@ -3,6 +3,7 @@ import { render, RenderOptions } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { CompaniesProvider } from '@/contexts/CompaniesContext'
+import { DashboardProvider } from '@/contexts/DashboardContext'
 
 const renderWithProviders = (
   ui: React.ReactElement,
@@ -12,9 +13,11 @@ const renderWithProviders = (
 
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <QueryClientProvider client={queryClient}>
-      <CompaniesProvider>
-        <MemoryRouter>{children}</MemoryRouter>
-      </CompaniesProvider>
+      <DashboardProvider>
+        <CompaniesProvider>
+          <MemoryRouter>{children}</MemoryRouter>
+        </CompaniesProvider>
+      </DashboardProvider>
     </QueryClientProvider>
   )
 

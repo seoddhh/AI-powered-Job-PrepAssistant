@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ResumeManager from '../ResumeManager';
 import { analyzeResume, generateResume } from '@/lib/api';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 vi.mock('@/lib/api', () => ({
   analyzeResume: vi.fn(),
@@ -21,7 +22,7 @@ describe('ResumeManager', () => {
     vi.clearAllMocks();
   });
 
-  test('AI 첨삭 요청 버튼 클릭 시 analyzeResume 호출', async () => {
+  it('AI 첨삭 요청 버튼 클릭 시 analyzeResume 호출', async () => {
     render(<ResumeManager />);
     const textarea = screen.getByPlaceholderText(/자기소개서를 입력해주세요/i);
     const text = 'a'.repeat(200);
@@ -32,7 +33,7 @@ describe('ResumeManager', () => {
     expect(analyzeMock).toHaveBeenCalledWith(text);
   });
 
-  test('AI 자기소개서 생성 버튼 클릭 시 generateResume 호출', async () => {
+  it('AI 자기소개서 생성 버튼 클릭 시 generateResume 호출', async () => {
     render(<ResumeManager />);
     const generateTab = screen.getByRole('tab', { name: /신규 생성/ });
     await userEvent.click(generateTab);

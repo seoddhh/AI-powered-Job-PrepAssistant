@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { jsPDF } from "jspdf";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
@@ -9,6 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { usePersonalInfo } from "@/contexts/PersonalInfoContext";
+import { useCompanies } from "@/contexts/CompaniesContext";
 import { 
   Download, 
   FileText, 
@@ -21,10 +23,27 @@ import {
 
 const ExportOptions = () => {
   const { toast } = useToast();
+  const { personalInfo } = usePersonalInfo();
+  const { companies } = useCompanies();
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [fileFormat, setFileFormat] = useState<string>("");
   const [fontStyle, setFontStyle] = useState<string>("default");
   const [isExporting, setIsExporting] = useState(false);
+  const [resumeFeedback, setResumeFeedback] = useState("");
+  const [questions, setQuestions] = useState<any[]>([]);
+
+  useEffect(() => {
+    const feedback = localStorage.getItem("resume_feedback") || "";
+    setResumeFeedback(feedback);
+    const saved = localStorage.getItem("interview_questions");
+    if (saved) {
+      try {
+        setQuestions(JSON.parse(saved));
+      } catch {
+        setQuestions([]);
+      }
+    }
+  }, []);
 
   const exportItems = [
     { id: "personal", label: "인적사항", icon: User, description: "기본 개인정보 및 경력사항" },
@@ -53,12 +72,14 @@ const ExportOptions = () => {
 
   const gatherSelectedData = () => {
     const data: Record<string, string> = {
-      personal: "인적사항 내용",
-      resume: "자기소개서 내용",
-      companies: "기업 정보 내용",
-      questions: "면접 질문 내용",
-      answers: "면접 답변 내용",
-      summary: "전체 요약 내용",
+      personal: `${personalInfo.name}\n${personalInfo.detailedExperience}`,
+      resume: resumeFeedback,
+      companies: companies.map(c => `${c.name} - ${c.position}`).join("\n"),
+      questions: questions.map(q => q.question).join("\n"),
+      answers: questions
+        .map(q => `${q.answer}${q.feedback ? `\n${q.feedback}` : ""}`)
+        .join("\n\n"),
+      summary: `지원 기업 ${companies.length}개, 질문 ${questions.length}개 보유`,
     };
     return selectedItems.map(id => data[id]).filter(Boolean).join("\n\n");
   };

@@ -93,3 +93,7 @@ src/
 ```
 
 공통 테스트 설정은 `vitest.setup.ts`에 정의되어 있으며, `src/test-utils.tsx`에는 `renderWithProviders`와 같은 테스트 도우미가 들어 있습니다.
+
+## 데이터베이스 스키마
+
+PostgreSQL을 사용하며 주요 테이블 구조는 `docs/database-schema.md`에 정리되어 있습니다. 개발 시 `.env` 파일의 `DATABASE_URL` 값에 연결 문자열을 지정하면 됩니다.

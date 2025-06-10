@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import Anthropic from '@anthropic-ai/sdk';
 import dotenv from 'dotenv';
+import { pool } from './db.js';
 
 dotenv.config();
 
@@ -14,6 +15,40 @@ app.use(express.json());
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || ''
 });
+
+async function initTables() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS resumes(
+    id SERIAL PRIMARY KEY,
+    name TEXT,
+    position TEXT,
+    experience TEXT,
+    content TEXT,
+    feedback TEXT
+  )`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS generated_resumes(
+    id SERIAL PRIMARY KEY,
+    name TEXT,
+    position TEXT,
+    experience TEXT,
+    keywords TEXT,
+    content TEXT
+  )`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS questions(
+    id SERIAL PRIMARY KEY,
+    company TEXT,
+    position TEXT,
+    experience TEXT,
+    content TEXT
+  )`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS answers(
+    id SERIAL PRIMARY KEY,
+    question TEXT,
+    answer TEXT,
+    feedback TEXT
+  )`);
+}
+
+initTables().catch(console.error);
 
 app.post('/api/resume/analyze', async (req, res) => {
   try {
@@ -41,7 +76,12 @@ app.post('/api/resume/analyze', async (req, res) => {
       messages: [{ role: 'user', content: prompt }],
     });
 
-    res.json({ result: response.content[0].text });
+    const { rows } = await pool.query(
+      `INSERT INTO resumes(name, position, experience, content, feedback)
+       VALUES ($1,$2,$3,$4,$5) RETURNING id`,
+      [name, position, experience, resumeContent, response.content[0].text]
+    );
+    res.json({ id: rows[0].id, result: response.content[0].text });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Failed to get response from Claude' });
@@ -73,7 +113,12 @@ app.post('/api/resume/generate', async (req, res) => {
       messages: [{ role: 'user', content: prompt }],
     });
 
-    res.json({ result: response.content[0].text });
+    const { rows } = await pool.query(
+      `INSERT INTO generated_resumes(name, position, experience, keywords, content)
+       VALUES ($1,$2,$3,$4,$5) RETURNING id`,
+      [name, position, experience, keywords, response.content[0].text]
+    );
+    res.json({ id: rows[0].id, result: response.content[0].text });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Failed to get response from Claude' });
@@ -105,7 +150,12 @@ app.post('/api/interview/questions', async (req, res) => {
       messages: [{ role: 'user', content: prompt }],
     });
 
-    res.json({ result: response.content[0].text });
+    const { rows } = await pool.query(
+      `INSERT INTO questions(company, position, experience, content)
+       VALUES ($1,$2,$3,$4) RETURNING id`,
+      [company, position, experience, response.content[0].text]
+    );
+    res.json({ id: rows[0].id, result: response.content[0].text });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Failed to get response from Claude' });
@@ -137,7 +187,12 @@ app.post('/api/interview/feedback', async (req, res) => {
       messages: [{ role: 'user', content: prompt }],
     });
 
-    res.json({ result: response.content[0].text });
+    const { rows } = await pool.query(
+      `INSERT INTO answers(question, answer, feedback)
+       VALUES ($1,$2,$3) RETURNING id`,
+      [question, answer, response.content[0].text]
+    );
+    res.json({ id: rows[0].id, result: response.content[0].text });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: 'Failed to get response from Claude' });

@@ -1,13 +1,8 @@
 import CompanyManager from '../CompanyManager';
-import { CompaniesProvider } from '@/contexts/CompaniesContext';
-import { render, screen } from '@testing-library/react';
+import { renderWithProviders, screen } from '@/test-utils';
 import { expect, describe, it } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-
-function renderWithProviders(ui: React.ReactElement) {
-  return render(<CompaniesProvider>{ui}</CompaniesProvider>);
-}
 
 describe('CompanyManager', () => {
   it('기본 회사 목록이 표시되어야 한다', () => {

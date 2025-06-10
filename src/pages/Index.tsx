@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { usePersonalInfo } from "@/contexts/PersonalInfoContext";
+import { useDashboard } from "@/contexts/DashboardContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -23,8 +25,7 @@ import ExportOptions from "@/components/ExportOptions";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const { personalInfo } = usePersonalInfo();
-  };
+  const { stats } = useDashboard();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -75,7 +76,7 @@ const Index = () => {
               <Card className="hover:shadow-lg transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">인적사항</CardTitle>
-                  {dashboardStats.personalInfo.completed ? (
+                  {stats.personalInfo.completed ? (
                     <CheckCircle className="h-4 w-4 text-green-600" />
                   ) : (
                     <AlertCircle className="h-4 w-4 text-orange-600" />
@@ -83,9 +84,9 @@ const Index = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-slate-800">
-                    {dashboardStats.personalInfo.completed ? "완료" : "미완료"}
+                    {stats.personalInfo.completed ? "완료" : "미완료"}
                   </div>
-                  <Progress value={dashboardStats.personalInfo.progress} className="mt-2" />
+                  <Progress value={stats.personalInfo.progress} className="mt-2" />
                 </CardContent>
               </Card>
 
@@ -97,11 +98,11 @@ const Index = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-slate-800">
-                    {dashboardStats.resume.progress}%
+                    {stats.resume.progress}%
                   </div>
-                  <Progress value={dashboardStats.resume.progress} className="mt-2" />
+                  <Progress value={stats.resume.progress} className="mt-2" />
                   <p className="text-xs text-slate-600 mt-2">
-                    {dashboardStats.resume.completed ? 'AI 첨삭 완료' : 'AI 첨삭 진행중'}
+                    {stats.resume.completed ? 'AI 첨삭 완료' : 'AI 첨삭 진행중'}
                   </p>
                 </CardContent>
               </Card>
@@ -114,7 +115,7 @@ const Index = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-slate-800">
-                    {dashboardStats.companies.count}개
+                    {stats.companies.count}개
                   </div>
                   <p className="text-xs text-slate-600 mt-2">기업 정보 등록됨</p>
                 </CardContent>
@@ -128,12 +129,10 @@ const Index = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold text-slate-800">
-                    {dashboardStats.interviews.answered}/{dashboardStats.interviews.total}
+                    {stats.interviews.answered}/{stats.interviews.total}
                   </div>
-                  <Progress value={dashboardStats.interviews.progress} className="mt-2" />
-                  <p className="text-xs text-slate-600 mt-2">
-                    {dashboardStats.interviews.progress === 100 ? '모든 질문 답변 완료' : '질문 답변 진행중'}
-                  </p>
+                  <Progress value={stats.interviews.progress} className="mt-2" />
+                  <p className="text-xs text-slate-600 mt-2">질문 답변 완료</p>
                 </CardContent>
               </Card>
             </div>

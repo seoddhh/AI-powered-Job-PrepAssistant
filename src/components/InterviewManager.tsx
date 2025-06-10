@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,8 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  Target
+  Target,
+  Trash2
 } from "lucide-react";
 
 interface Question {
@@ -33,24 +33,33 @@ interface Question {
   feedback?: string;
 }
 
+const STORAGE_KEY = 'interview_questions';
+
 const InterviewManager = () => {
   const { toast } = useToast();
   const { companies } = useCompanies();
-  const { setInterviews } = useDashboard();
+  const { stats, setInterviews } = useDashboard();
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
   const [company, setCompany] = useState('');
   const [position, setPosition] = useState('');
   const [experience, setExperience] = useState('');
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<Question[]>(() => {
+    const savedQuestions = localStorage.getItem(STORAGE_KEY);
+    return savedQuestions ? JSON.parse(savedQuestions) : [];
+  });
 
   const selectedQuestion = questions.find(q => q.id === selectedQuestionId);
 
   useEffect(() => {
     const total = questions.length;
-    const answered = questions.filter(q => q.status !== 'unanswered').length;
+    const answered = questions.filter(q => q.status === 'completed').length;
     const progress = total === 0 ? 0 : Math.round((answered / total) * 100);
     setInterviews({ answered, total, progress });
   }, [questions, setInterviews]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(questions));
+  }, [questions]);
 
   const handleGenerateQuestions = async () => {
     if (!company.trim() || !position.trim() || !experience.trim()) {
@@ -61,19 +70,26 @@ const InterviewManager = () => {
       const result = await generateInterviewQuestions(company, position, experience);
       const lines = (result.result || result).split('\n').filter((l: string) => l.trim());
       const items = lines.map((line: string, idx: number) => ({
-        id: String(idx + 1),
+        id: `${Date.now()}-${idx + 1}`,
         question: line.replace(/^질문:\s*/, '').trim(),
         answer: '',
         status: 'unanswered' as const,
       }));
-      setQuestions(items);
+      setQuestions(prev => [...prev, ...items]);
       setSelectedQuestionId(null);
       toast({ title: '생성 완료', description: '면접 질문이 생성되었습니다.' });
-      setInterviews({ answered: 0, total: items.length, progress: 0 });
     } catch (err) {
       console.error(err);
       toast({ title: '오류', description: '질문 생성에 실패했습니다.', variant: 'destructive' });
     }
+  };
+
+  const handleDeleteQuestion = (questionId: string) => {
+    setQuestions(prev => prev.filter(q => q.id !== questionId));
+    if (selectedQuestionId === questionId) {
+      setSelectedQuestionId(null);
+    }
+    toast({ title: '삭제 완료', description: '질문이 삭제되었습니다.' });
   };
 
   const handleAnswerChange = (value: string) => {
@@ -231,7 +247,6 @@ const InterviewManager = () => {
                 {questions.map((question, index) => (
                   <div
                     key={question.id}
-                    onClick={() => setSelectedQuestionId(question.id)}
                     className={`p-4 rounded-lg border cursor-pointer transition-all ${
                       selectedQuestionId === question.id
                         ? 'border-blue-500 bg-blue-50' 
@@ -242,7 +257,10 @@ const InterviewManager = () => {
                       <span className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">
                         {index + 1}
                       </span>
-                      <div className="flex-1 min-w-0">
+                      <div 
+                        className="flex-1 min-w-0"
+                        onClick={() => setSelectedQuestionId(question.id)}
+                      >
                         <p className="text-sm font-medium text-slate-800 mb-2 line-clamp-2">
                           {question.question}
                         </p>
@@ -253,6 +271,17 @@ const InterviewManager = () => {
                           </span>
                         </div>
                       </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="flex-shrink-0 h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteQuestion(question.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
                 ))}
